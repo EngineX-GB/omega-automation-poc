@@ -1,0 +1,14 @@
+    {
+      "id" : "4",
+      "name" : "bsx2",
+      "regex" : "manifest_",
+      "adapter" : "devtools",
+      "matchType" : "contains",
+      "steps" : [
+        {"stepNumber" :  1,
+          "elementType" :  "PAUSE",
+          "value" : "5000"
+        }
+	],
+      "stream" : false
+    }

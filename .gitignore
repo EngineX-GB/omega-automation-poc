@@ -1,0 +1,5 @@
+.idea/
+vids/
+venv/
+archived_scripts/
+__pycache__/
