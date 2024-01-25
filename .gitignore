@@ -3,3 +3,6 @@ vids/
 venv/
 archived_scripts/
 __pycache__/
+model1.py
+runner.py
+config/config.json
