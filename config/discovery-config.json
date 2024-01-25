@@ -1,4 +1,5 @@
-    {
+    [
+      {
       "id" : "4",
       "name" : "bsx2",
       "regex" : "manifest_",
@@ -11,4 +12,20 @@
         }
 	],
       "stream" : false
+    },
+
+    {
+      "id" : "4",
+      "name" : "bsx3",
+      "regex" : "chunklist_([a-z0-9]+)_vo",
+      "adapter" : "devtools",
+      "matchType" : "pattern",
+      "steps" : [
+        {"stepNumber" :  1,
+          "elementType" :  "PAUSE",
+          "value" : "5000"
+        }
+	],
+      "stream" : false
     }
+]
