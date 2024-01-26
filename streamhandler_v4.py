@@ -4,6 +4,7 @@ import sys
 import requests
 import time
 import subprocess
+import threading
 from propertymanager import PropertyManager
 from util import Util
 
@@ -26,6 +27,23 @@ class StreamHandler:
             return "ERROR"
         return dict["link"]
 
+
+    def concat_files(self, audioFilepath, mediaFilepath, outputFilepath):
+        # Start ffmpeg process
+        print("[INFO] Concatenating files....")
+        print("[DEBUG] Audio : " + audioFilepath)
+        print("[DEBUG] Media : " + mediaFilepath)
+        print("[DEBUG] Output : " + outputFilepath)
+
+        ffmpeg_path = self.property_manager.get_ffmpeg_path()
+        command = [ffmpeg_path + "\\ffmpeg.exe", "-i", audioFilepath, "-i", mediaFilepath, "-c", "copy", outputFilepath]
+        process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+        #
+        # # Check if the process exited successfully
+        # if process.returncode != 0:
+        #     print(f"ffmpeg concat process failed with return code {process.returncode}")
+        # else:
+        #     print("ffmpeg concat process completed successfully")
 
     def get_stream_link(self, url : str, foldername : str,  filename : str):
         # Start ffmpeg process
@@ -82,9 +100,26 @@ class StreamHandler:
                 if link != "ERROR":
                     # -- removed : incremented_number = (incremented_number +
                     username_folder = self.property_manager.get_library_path() + "/" + username
-                    Util.create(username_folder)
-                    incremented_number = Util.get_latest_counter_for_stream_file(username_folder, username)
-                    self.get_stream_link(link, username_folder, username + "_" + str(incremented_number) + ".mkv")
+                    Util.create(username_folder + "/audio")
+                    Util.create(username_folder + "/video")
+                    incremented_number = Util.get_latest_counter_for_stream_file(username_folder + "/video", username)
+                    # self.get_stream_link(link, username_folder, username + "_" + str(incremented_number) + ".mkv")
+                    mediaThread = threading.Thread(target=self.get_stream_link, args=(link, username_folder + "/video", username + "_" + str(incremented_number) + ".mkv"))
+                    audioThread = threading.Thread(target=self.get_stream_link, args=(link.replace("_vo", "_ao"), username_folder + "/audio", username + "_" + str(incremented_number) + ".mp3"))
+
+                    mediaThread.start()
+                    audioThread.start()
+
+                    mediaThread.join()
+                    audioThread.join()
+
+                    # here, run the code to combine the audio and media
+                    audioFilepath = (username_folder + "/audio/" + username + "_" + str(incremented_number) + ".mp3")
+                    mediaFilepath = (username_folder + "/video/" + username + "_" + str(incremented_number) + ".mkv")
+                    outputFilepath = (username_folder + "/" + username + "_" + str(incremented_number) + ".mkv")
+                    self.concat_files(audioFilepath, mediaFilepath, outputFilepath)
+
+
                 else:
                     print("[ERROR] Error in processing the stream. Retry in 5 minutes")
                     time.sleep(300)
